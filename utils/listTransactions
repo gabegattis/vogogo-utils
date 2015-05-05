@@ -1,2 +1,28 @@
 #!/usr/bin/env node
 'use strict';
+var Vogogo = require('../lib/vogogo');
+var config = require('../config');
+
+if (process.argv[3]) {
+  console.log('usage: ./listTransactions <currency> (optional)');
+  process.exit();
+}
+
+var params = {};
+
+var currency = process.argv[2];
+if (currency) {
+  params.currency = currency;
+}
+
+var vogogo = new Vogogo(config.authParams);
+
+vogogo.listTransactions(params, function(err, transactions) {
+  if (err) {
+    console.log('ERROR: ', err);
+  } else if (!transactions) {
+    console.log('no results from Vogogo');
+  } else {
+    console.log(transactions);
+  }
+});

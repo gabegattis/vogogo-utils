@@ -1,2 +1,25 @@
 #!/usr/bin/env node
 'use strict';
+var Vogogo = require('../lib/vogogo');
+var config = require('../config');
+
+if (!process.argv[2] || process.argv[3]) {
+  console.log('usage: ./getTransaction <id>');
+  process.exit();
+}
+
+var params = {
+  id: process.argv[2]
+};
+
+var vogogo = new Vogogo(config.authParams);
+
+vogogo.getTransaction(params, function(err, transaction) {
+  if (err) {
+    console.log('ERROR: ', err);
+  } else if (!transaction) {
+    console.log('no results from Vogogo');
+  } else {
+    console.log(transaction);
+  }
+});

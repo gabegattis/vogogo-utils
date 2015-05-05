@@ -1,2 +1,27 @@
 #!/usr/bin/env node
 'use strict';
+var Vogogo = require('../lib/vogogo');
+var config = require('../config');
+
+if (!process.argv[5] || process.argv[6]) {
+  console.log('usage: ./pay <id> <account_id> <amount> <currency>');
+  process.exit();
+}
+
+var params = {
+  id: process.argv[2],
+  account_id: process.argv[3],
+  amount: process.argv[4],
+  currency: process.argv[5],
+  ip: '127.0.0.1'
+};
+
+var vogogo = new Vogogo(config.authParams);
+
+vogogo.pay(params, function(err) {
+  if (err) {
+    console.log('ERROR: ', err);
+  } else {
+    console.log('Success');
+  }
+});

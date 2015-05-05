@@ -717,6 +717,24 @@ describe('Vogogo', function() {
       });
     });
 
+    it('should error with invalid currency', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 418}, 'I am a teapot');
+      });
+      var params = {currency: 'XYZ'};
+
+      (function() {
+        vogogo.listTransactions(params, function(){});
+      }).should.throw(Error, /XYZ is not a supported currency/);
+
+      _g.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
     it('should list transactions', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
@@ -844,7 +862,8 @@ describe('Vogogo', function() {
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
-          }
+          },
+          qs: {herp: 'derp'}
         });
         sandbox.restore();
         done();
@@ -876,7 +895,8 @@ describe('Vogogo', function() {
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
-          }
+          },
+          qs: {}
         });
         sandbox.restore();
         done();
