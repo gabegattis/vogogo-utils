@@ -151,6 +151,14 @@ describe('Vogogo', function() {
   });
 
   describe('pay', function() {
+    var goodParams = {
+      id : '1234',
+      account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+      amount: '155.00',
+      currency: 'CAD',
+      ip: '127.0.0.1'
+    };
+
     it('should handle _post error', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
@@ -158,14 +166,14 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
-      var params = {};
-      vogogo.pay(params, function(err) {
+
+      vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
-        _p.args[0][1].should.deep.equal({});
+        _p.args[0][1].should.equal(goodParams);
         sandbox.restore();
         done();
       });
@@ -178,14 +186,14 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 403});
       });
-      var params = {};
-      vogogo.pay(params, function(err) {
+
+      vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('403 FORBIDDEN');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
-        _p.args[0][1].should.deep.equal({});
+        _p.args[0][1].should.equal(goodParams);
         sandbox.restore();
         done();
       });
@@ -198,14 +206,14 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 409});
       });
-      var params = {};
-      vogogo.pay(params, function(err) {
+
+      vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('409 CONFLICT');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
-        _p.args[0][1].should.deep.equal({});
+        _p.args[0][1].should.equal(goodParams);
         sandbox.restore();
         done();
       });
@@ -218,35 +226,348 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 418}, 'I am a teapot');
       });
-      var params = {};
-      vogogo.pay(params, function(err) {
+
+      vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
-        err.message.should.equal('non-200 status code: 418');
+        err.message.should.equal('bad status code: 418');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
-        _p.args[0][1].should.deep.equal({});
+        _p.args[0][1].should.equal(goodParams);
         sandbox.restore();
         done();
       });
     });
 
-    it('should make a payment', function(done) {
+    it('should make a payment, code 200', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200});
       });
-      var params = {a:'b'};
-      vogogo.pay(params, function(err) {
+
+      vogogo.pay(goodParams, function(err) {
         should.not.exist(err);
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
-        _p.args[0][1].should.deep.equal({a:'b'});
+        _p.args[0][1].should.equal(goodParams);
         sandbox.restore();
         done();
       });
+    });
+
+    it('should make a payment, code 201', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      vogogo.pay(goodParams, function(err) {
+        should.not.exist(err);
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/pay');
+        _p.args[0][1].should.equal(goodParams);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should error if no id', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /id is a required parameter/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if no account_id', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /account_id is a required parameter/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if no amount', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',        
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /amount is a required parameter/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if no currency', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /currency is a required parameter/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if no ip', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /ip is a required parameter/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if id is not a string', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : 1234,
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /id must be a string/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if account_id is not a string', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 78789878789898789,
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /account_id must be a string/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if currency is not a string', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 019283746,
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /currency must be a string/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if ip is not a string', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: 127001
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /ip must be a string/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if ip is too long', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '123456789012345678901234567890123'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /ip must be 32 characters or less/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if id is too long', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234567890123456789012345678901234567',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /id must be 36 characters or less/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if currency is invalid', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'XYZ',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /XYZ is not a supported currency/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
     });
   });
 
