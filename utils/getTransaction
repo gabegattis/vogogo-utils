@@ -12,11 +12,14 @@ var params = {
   id: process.argv[2]
 };
 
-var vogogo = new Vogogo(config.authParams);
+var options = config.authParams;
+options.apiPrefix = config.environments[config.defaultEnvironment];
+
+var vogogo = new Vogogo(options);
 
 vogogo.getTransaction(params, function(err, transaction) {
   if (err) {
-    console.log('ERROR: ', err);
+    console.log(err);
   } else if (!transaction) {
     console.log('no results from Vogogo');
   } else {

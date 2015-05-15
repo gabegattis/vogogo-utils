@@ -3,28 +3,24 @@
 var Vogogo = require('../lib/vogogo');
 var config = require('../config');
 
-if (!process.argv[5] || process.argv[6]) {
-  console.log('usage: ./pay <id> <account_id> <amount> <currency>');
+if (process.argv[3]) {
+  console.log('usage: ./createCustomer');
   process.exit();
 }
 
-var params = {
-  id: process.argv[2],
-  account_id: process.argv[3],
-  amount: 100,// process.argv[4],
-  currency: process.argv[5],
-  ip: '127.0.0.1'
-};
+var params = {};
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
 
 var vogogo = new Vogogo(options);
 
-vogogo.pay(params, function(err) {
+vogogo.createCustomer(params, function(err, result) {
   if (err) {
     console.log(err);
+  } else if (!result) {
+    console.log('no results from Vogogo');
   } else {
-    console.log('Success');
+    console.log(result);
   }
 });

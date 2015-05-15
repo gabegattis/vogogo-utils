@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+'use strict';
+var Vogogo = require('../lib/vogogo');
+var config = require('../config');
+
+if (!process.argv[8] || process.argv[9]) {
+  console.log('usage: ./addBankAccount <name> <institution> <transit> <routing> <number> <currency> <financial_type>');
+  process.exit();
+}
+
+//name
+//institution
+//transit
+//routing
+//number
+//currency
+//financial_type
+//customerid
+
+var params = {
+  name: process.argv[2],
+  institution: process.argv[3],
+  transit: process.argv[4],
+  //routing: process.argv[5],
+  number: process.argv[6],
+  currency: process.argv[7],
+  financial_type: process.argv[8],
+};
+
+
+var usdparams = {
+  name: process.argv[2],
+  //institution: process.argv[3],
+  //transit: process.argv[4],
+  routing: process.argv[5],
+  number: process.argv[6],
+  currency: process.argv[7],
+  financial_type: process.argv[8],
+};
+
+var options = config.authParams;
+options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
+
+var vogogo = new Vogogo(options);
+
+vogogo.addBankAccount(params, function(err) {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('Success');
+  }
+});

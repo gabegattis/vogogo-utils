@@ -15,11 +15,14 @@ if (currency) {
   params.currency = currency;
 }
 
-var vogogo = new Vogogo(config.authParams);
+var options = config.authParams;
+options.apiPrefix = config.environments[config.defaultEnvironment];
+
+var vogogo = new Vogogo(options);
 
 vogogo.listTransactions(params, function(err, transactions) {
   if (err) {
-    console.log('ERROR: ', err);
+    console.log(err);
   } else if (!transactions) {
     console.log('no results from Vogogo');
   } else {

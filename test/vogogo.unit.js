@@ -23,7 +23,11 @@ describe('Vogogo', function() {
     }
   };
 
-  var constructorOptions = config.authParams;
+  var constructorOptions = {
+    clientId: '555c3c5ede4b81f9e1d7f22f273b23ae745023d7d208d2da48a36312e5a83dab',
+    clientSecret: 'fb397fdf8d28ea72ec6901fe186eb74a6de28125ae026a14fade58eabafd9b50',
+    customerAccessToken: '3517d938-e4a6-1a99-12f7-1947d2cf41e0'
+  };
 
   describe('constructor', function() {
     it('should create new Vogogo without apiPrefix', function(done) {
@@ -87,7 +91,7 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should fail if customerAccessToken is not a string', function(done) {
+    xit('should fail if customerAccessToken is not a string', function(done) {
       var options = {
         clientId: 'asdf',
         clientSecret: 'qwert',
@@ -137,7 +141,7 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should fail with no customerAccessToken', function(done) {
+    xit('should fail with no customerAccessToken', function(done) {
       var options = {
         clientId: 'adsf',
         clientSecret: 'qwert'
@@ -184,13 +188,13 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
-        callback(null, {statusCode: 403});
+        callback(null, {statusCode: 403}, {error_message: 'this is an error'});
       });
 
       vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
-        err.message.should.equal('403 FORBIDDEN');
+        err.message.should.equal('403 FORBIDDEN - this is an error');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
         _p.args[0][1].should.equal(goodParams);
@@ -204,13 +208,13 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
-        callback(null, {statusCode: 409});
+        callback(null, {statusCode: 409}, {error_message: 'this is an error'});
       });
 
       vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
-        err.message.should.equal('409 CONFLICT');
+        err.message.should.equal('409 CONFLICT - this is an error');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
         _p.args[0][1].should.equal(goodParams);
@@ -224,13 +228,13 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
-        callback(null, {statusCode: 418}, 'I am a teapot');
+        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
 
       vogogo.pay(goodParams, function(err) {
         should.exist(err);
         err.should.be.an.instanceOf(Error);
-        err.message.should.equal('bad status code: 418');
+        err.message.should.equal('bad status code: 418 - this is an error');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/pay');
         _p.args[0][1].should.equal(goodParams);
@@ -445,6 +449,106 @@ describe('Vogogo', function() {
       done();
     });
 
+    it('should error if amount is not a number', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: '78789878789898789',
+        amount: 'hello',
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if amount is negative', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: '78789878789898789',
+        amount: -1,
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if amount is 0', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: '78789878789898789',
+        amount: 0,
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error if amount is infinity', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        id : '1234',
+        account_id: '78789878789898789',
+        amount: Infinity,
+        currency: 'CAD',
+        ip: '127.0.0.1'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
     it('should error if currency is not a string', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
@@ -637,14 +741,14 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
-        callback(null, {statusCode: 418}, 'I am a teapot');
+        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {id: '12345'};
       vogogo.getTransaction(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
-        err.message.should.equal('non-200 status code: 418');
+        err.message.should.equal('bad status code: 418 - this is an error');
         _g.callCount.should.equal(1);
         _g.args[0][0].should.equal('/transactions/12345');
         _g.args[0][1].should.deep.equal({});
@@ -701,14 +805,14 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
-        callback(null, {statusCode: 418}, 'I am a teapot');
+        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {};
       vogogo.listTransactions(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
-        err.message.should.equal('non-200 status code: 418');
+        err.message.should.equal('bad status code: 418 - this is an error');
         _g.callCount.should.equal(1);
         _g.args[0][0].should.equal('/transactions');
         _g.args[0][1].should.deep.equal({});
@@ -722,7 +826,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
-        callback(null, {statusCode: 418}, 'I am a teapot');
+        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {currency: 'XYZ'};
 
@@ -758,12 +862,98 @@ describe('Vogogo', function() {
     });
   });
 
+  describe('addBankAccount', function() {
+    it('should handle _post error', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+      var params = {};
+      vogogo.addBankAccount(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts');
+        _p.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle non-200 code', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
+      });
+      var params = {};
+      vogogo.addBankAccount(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 418 - this is an error');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts');
+        _p.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    xit('should error with invalid currency', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
+      });
+      var params = {currency: 'XYZ'};
+
+      (function() {
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /XYZ is not a supported currency/);
+
+      _g.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should list transactions', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {bank: 'account'});
+      });
+      var params = {};
+      vogogo.addBankAccount(params, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.deep.equal({
+          bank: 'account'
+        });
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts');
+        _p.args[0][1].should.deep.equal(params);
+        sandbox.restore();
+        done();
+      });
+    });
+  });
+
   describe('_generateAuthToken', function() {
     it ('should generate the auth token', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var authToken = vogogo._generateAuthToken();
-      authToken.should.equal('Basic cXdlcnR5OmFzZGY=');
+      var goodToken = 'Basic OGVhMWFlMDI2ZDE0ZmFmYjM5NDJiYzY5NzAxZmU1ZGU3ZmRmMmQyOGJmZmQxMmVhOWI1Mjg2ZWI3'
+      + 'NGE2ZGQyODpjYzg0NTcyMi1jZDg0LTQxZmYtOThmMi01NmE4YjFhNzczMmY=';
+      authToken.should.equal(goodToken);
       done();
     });
   });
