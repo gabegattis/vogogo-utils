@@ -905,30 +905,34 @@ describe('Vogogo', function() {
       });
     });
 
-    xit('should error with invalid currency', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
-        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
-      });
-      var params = {currency: 'XYZ'};
-
-      (function() {
-        vogogo.addBankAccount(params, function(){});
-      }).should.throw(Error, /XYZ is not a supported currency/);
-
-      _g.callCount.should.equal(0);
-      sandbox.restore();
-      done();
-    });
-
-    it('should list transactions', function(done) {
+    it('should add account 200', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200}, {bank: 'account'});
+      });
+      var params = {};
+      vogogo.addBankAccount(params, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.deep.equal({
+          bank: 'account'
+        });
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts');
+        _p.args[0][1].should.deep.equal(params);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should add account 201', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201}, {bank: 'account'});
       });
       var params = {};
       vogogo.addBankAccount(params, function(err, body) {
