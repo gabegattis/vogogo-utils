@@ -91,19 +91,6 @@ describe('Vogogo', function() {
       done();
     });
 
-    xit('should fail if customerAccessToken is not a string', function(done) {
-      var options = {
-        clientId: 'asdf',
-        clientSecret: 'qwert',
-        customerAccessToken: 10,
-        apiPrefix: 'https://fakevogogo.com/api/v9000'
-      };
-
-      (function(){var vogogo = new Vogogo(options);}).should.throw(Error, /customerAccessToken must be a string/);
-
-      done();
-    });
-
     it('should fail if apiPrefix is not a string', function(done) {
       var options = {
         clientId: 'adsf',
@@ -136,18 +123,6 @@ describe('Vogogo', function() {
       };
 
       var message = /you must supply a clientSecret in the constructor options/;
-      (function(){var vogogo = new Vogogo(options);}).should.throw(Error, message);
-
-      done();
-    });
-
-    xit('should fail with no customerAccessToken', function(done) {
-      var options = {
-        clientId: 'adsf',
-        clientSecret: 'qwert'
-      };
-
-      var message = /you must supply a customerAccessToken in the constructor options/;
       (function(){var vogogo = new Vogogo(options);}).should.throw(Error, message);
 
       done();
@@ -813,6 +788,27 @@ describe('Vogogo', function() {
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('bad status code: 418 - this is an error');
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/transactions');
+        _g.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle no transactions', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {});
+      });
+      var params = {};
+      vogogo.listTransactions(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('no transactions array in response from Vogogo');
         _g.callCount.should.equal(1);
         _g.args[0][0].should.equal('/transactions');
         _g.args[0][1].should.deep.equal({});
@@ -1490,6 +1486,112 @@ describe('Vogogo', function() {
     });
   });
 
+  describe('getAccounts', function() {
+    it('should handle _get error', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+
+      vogogo.getAccounts({currency: 'CAD'}, function(err, accounts) {
+        should.exist(err);
+        should.not.exist(accounts);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/accounts');
+        _g.args[0][1].should.deep.equal({currency: 'CAD'});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should bad status code', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 999}, {error_message: 'NO! NO! NO!'});
+      });
+
+      vogogo.getAccounts({currency: 'CAD'}, function(err, accounts) {
+        should.exist(err);
+        should.not.exist(accounts);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 999 - NO! NO! NO!');
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/accounts');
+        _g.args[0][1].should.deep.equal({currency: 'CAD'});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle no accounts', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {});
+      });
+
+      vogogo.getAccounts({currency: 'CAD'}, function(err, accounts) {
+        should.exist(err);
+        should.not.exist(accounts);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('no accounts array in response from Vogogo');
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/accounts');
+        _g.args[0][1].should.deep.equal({currency: 'CAD'});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should get accounts', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {accounts: [{foo: 'bar'}, {foo: 'baz'}]});
+      });
+
+      vogogo.getAccounts({currency: 'CAD'}, function(err, accounts) {
+        should.not.exist(err);
+        should.exist(accounts);
+        accounts.should.deep.equal([
+          {
+            foo: 'bar'
+          },
+          {
+            foo: 'baz'
+          }
+        ]);
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/accounts');
+        _g.args[0][1].should.deep.equal({currency: 'CAD'});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should error if no currency', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      (function() {vogogo.getAccounts({}, function(){});}).should.throw(Error, /currency is a required parameter/);
+      done();
+    });
+
+    it('should error if bad currency', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      (function() {vogogo.getAccounts({currency: 'XYZ'}, function(){});}).should.throw(Error, /invalid currency/);
+      done();
+    });
+  });
+
   describe('_generateAuthToken', function() {
     it ('should generate the auth token', function(done) {
       var vogogo = new Vogogo(constructorOptions);
@@ -1568,6 +1670,39 @@ describe('Vogogo', function() {
         done();
       });
     });
+
+    it('should handle JSON.parse error', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var po = sandbox.stub(request, 'post', function(options, callback) {
+        callback(null, {statusCode: 200}, '{{{{{{{{{');
+      });
+
+      var ge = sandbox.stub(vogogo, '_generateAuthToken', function() {
+        return 'Basic 12345678';
+      });
+
+      vogogo._post('/pay', {herp: 'derp'}, function(err, res, body) {
+        should.exist(err);
+        should.not.exist(res);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('failed to parse response from Vogogo');
+        ge.callCount.should.equal(1);
+        po.callCount.should.equal(1);
+        po.args[0][0].should.deep.equal({
+          url: 'https://api.vogogo.com/v2/pay',
+          headers: {
+            Authorization: 'Basic 12345678',
+            'Content-Type': 'application/json'
+          },
+          qs: {herp: 'derp'}
+        });
+        sandbox.restore();
+        done();
+      });
+    });
   });
 
   describe('_get', function() {
@@ -1622,6 +1757,39 @@ describe('Vogogo', function() {
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
+        ga.callCount.should.equal(1);
+        ge.callCount.should.equal(1);
+        ge.args[0][0].should.deep.equal({
+          url: 'https://api.vogogo.com/v2/transactions',
+          headers: {
+            Authorization: 'Basic 12345678',
+            'Content-Type': 'application/json'
+          },
+          qs: {}
+        });
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle  JSON.parse error', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var ge = sandbox.stub(request, 'get', function(options, callback) {
+        callback(null, {statusCode: 200}, '{{{{{{{{{');
+      });
+
+      var ga = sandbox.stub(vogogo, '_generateAuthToken', function() {
+        return 'Basic 12345678';
+      });
+
+      vogogo._get('/transactions', {}, function(err, res, body) {
+        should.exist(err);
+        should.not.exist(res);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('failed to parse response from Vogogo');
         ga.callCount.should.equal(1);
         ge.callCount.should.equal(1);
         ge.args[0][0].should.deep.equal({
