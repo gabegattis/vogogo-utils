@@ -850,9 +850,9 @@ describe('Vogogo', function() {
       vogogo.listTransactions(params, function(err, body) {
         should.not.exist(err);
         should.exist(body);
-        body.should.deep.equal({
-          transactions: ['hello', 'transaction']
-        });
+        body.should.deep.equal(
+          ['hello', 'transaction']
+        );
         _g.callCount.should.equal(1);
         _g.args[0][0].should.equal('/transactions');
         _g.args[0][1].should.deep.equal({});
@@ -870,7 +870,13 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
-      var params = {};
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
       vogogo.addBankAccount(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
@@ -878,7 +884,7 @@ describe('Vogogo', function() {
         err.message.should.equal('this is an error');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/accounts');
-        _p.args[0][1].should.deep.equal({});
+        _p.args[0][1].should.deep.equal(params);
         sandbox.restore();
         done();
       });
@@ -891,7 +897,13 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
-      var params = {};
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
       vogogo.addBankAccount(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
@@ -899,7 +911,7 @@ describe('Vogogo', function() {
         err.message.should.equal('bad status code: 418 - this is an error');
         _p.callCount.should.equal(1);
         _p.args[0][0].should.equal('/accounts');
-        _p.args[0][1].should.deep.equal({});
+        _p.args[0][1].should.deep.equal(params);
         sandbox.restore();
         done();
       });
@@ -912,7 +924,13 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200}, {bank: 'account'});
       });
-      var params = {};
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
       vogogo.addBankAccount(params, function(err, body) {
         should.not.exist(err);
         should.exist(body);
@@ -934,7 +952,13 @@ describe('Vogogo', function() {
       var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201}, {bank: 'account'});
       });
-      var params = {};
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
       vogogo.addBankAccount(params, function(err, body) {
         should.not.exist(err);
         should.exist(body);
@@ -948,6 +972,522 @@ describe('Vogogo', function() {
         done();
       });
     });
+
+    it('should error with no name', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /name is a required parameter/);
+      done();
+    });
+
+    it('should error with name too long', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: '123456789012345678901234567890123456789012345678901',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid name/);
+      done();
+    });
+
+    it('should error with number name', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 10,
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid name/);
+      done();
+    });
+
+    it('should error with no number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /number is a required parameter/);
+      done();
+    });
+
+    it('should error with no currency', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /currency is a required parameter/);
+      done();
+    });
+
+    it('should error with invalid currency', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'xyz',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid currency/);
+      done();
+    });
+
+    it('should error with no financial_type', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /financial_type is a required parameter/);
+      done();
+    });
+
+    it('should error with invalid financial_type', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'slush fund',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid financial_type/);
+      done();
+    });
+
+    it('should error with no routing', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /routing is a required parameter for USD accounts/);
+      done();
+    });
+
+    it('should error with obj routing', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: {}
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid routing/);
+      done();
+    });
+
+    it('should error with to short routing', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '12345678'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid routing/);
+      done();
+    });
+
+    it('should error with too long routing', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '1234567890'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid routing/);
+      done();
+    });
+
+    it('should error with obj number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: {},
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid number/);
+      done();
+    });
+
+    it('should error with too short number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '12345',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid number/);
+      done();
+    });
+
+    it('should error with too long number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345678',
+        currency: 'USD',
+        financial_type: 'checking',
+        routing: '123456789'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid number/);
+      done();
+    });
+
+    it('should error with no institution', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /institution is a required parameter for CAD accounts/);
+      done();
+    });
+
+    it('should error with obj institution', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: {},
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid institution/);
+      done();
+    });
+
+    it('should error with too short institution', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '12',
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid institution/);
+      done();
+    });
+
+    it('should error with too long institution', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '1234',
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid institution/);
+      done();
+    });
+
+    it('should error with no transit', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /transit is a required parameter for CAD accounts/);
+      done();
+    });
+
+    it('should error with obj transit', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123',
+        transit: {}
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid transit/);
+      done();
+    });
+
+    it('should error with too long transit', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123',
+        transit: '123456'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid transit/);
+      done();
+    });
+
+    it('should error with too short transit', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456789012345',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123',
+        transit: '1234'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid transit/);
+      done();
+    });
+
+    it('should error with obj number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: {},
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123',
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid number/);
+      done();
+    });
+
+    it('should error with too short number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '123456',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123',
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid number/);
+      done();
+    });
+
+    it('should error with too long number', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var params = {
+        name: 'a',
+        number: '1234567890123456',
+        currency: 'CAD',
+        financial_type: 'checking',
+        institution: '123',
+        transit: '12345'
+      };
+      (function(){
+        vogogo.addBankAccount(params, function(){});
+      }).should.throw(Error, /invalid number/);
+      done();
+    });
+  });
+
+  describe('createCustomer', function() {
+    var customerParams = {
+      address_city: 'Toronto',
+      address_country: 'CA',
+      address_postal_code: 'M5P2N7',
+      address_state: 'CA-ON',
+      address_street_1: '1234 Main St - APPROVED',
+      cell_phone_country: 1,
+      cell_phone: 1234567890,
+      ip: '1.1.1.1',
+      is_business: false,
+      email: 'gabe+1@bitpay.com',
+      last_name: 'Dole',
+      first_name: 'Bob',
+      date_of_birth: '1900-01-01',
+      occupation_id: '1'
+    };
+
+    it('should handle _post error', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var sandbox = sinon.sandbox.create();
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+
+      vogogo.createCustomer(customerParams, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/customers');
+        _p.args[0][1].should.deep.equal(customerParams);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should create a customer 200', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var sandbox = sinon.sandbox.create();
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {hello: 'world'});
+      });
+
+      vogogo.createCustomer(customerParams, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.deep.equal({hello: 'world'});
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/customers');
+        _p.args[0][1].should.deep.equal(customerParams);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should create a customer 201', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var sandbox = sinon.sandbox.create();
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201}, {hello: 'world'});
+      });
+
+      vogogo.createCustomer(customerParams, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.deep.equal({hello: 'world'});
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/customers');
+        _p.args[0][1].should.deep.equal(customerParams);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle 403', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var sandbox = sinon.sandbox.create();
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 403}, {error_message: 'YOU SHALL NOT PASS'});
+      });
+
+      vogogo.createCustomer(customerParams, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('403 FORBIDDEN - YOU SHALL NOT PASS');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/customers');
+        _p.args[0][1].should.deep.equal(customerParams);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should hanle 420', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+      var sandbox = sinon.sandbox.create();
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 420}, {error_message: 'enhance your calm'});
+      });
+
+      vogogo.createCustomer(customerParams, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 420 - enhance your calm');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/customers');
+        _p.args[0][1].should.deep.equal(customerParams);
+        sandbox.restore();
+        done();
+      });
+    });
   });
 
   describe('_generateAuthToken', function() {
@@ -955,8 +1495,8 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var authToken = vogogo._generateAuthToken();
-      var goodToken = 'Basic OGVhMWFlMDI2ZDE0ZmFmYjM5NDJiYzY5NzAxZmU1ZGU3ZmRmMmQyOGJmZmQxMmVhOWI1Mjg2ZWI3'
-      + 'NGE2ZGQyODpjYzg0NTcyMi1jZDg0LTQxZmYtOThmMi01NmE4YjFhNzczMmY=';
+      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDozN'
+      + 'TE3ZDkzOC1lNGE2LTFhOTktMTJmNy0xOTQ3ZDJjZjQxZTA=';
       authToken.should.equal(goodToken);
       done();
     });
@@ -968,7 +1508,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var po = sandbox.stub(request, 'post', function(options, callback) {
-        callback(null, {statusCode: 200}, {foo: 'bar'});
+        callback(null, {statusCode: 200}, '{"foo": "bar"}');
       });
 
       var ge = sandbox.stub(vogogo, '_generateAuthToken', function() {
@@ -1036,7 +1576,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var ge = sandbox.stub(request, 'get', function(options, callback) {
-        callback(null, {statusCode: 200}, {foo: 'bar'});
+        callback(null, {statusCode: 200}, '{"foo": "bar"}');
       });
 
       var ga = sandbox.stub(vogogo, '_generateAuthToken', function() {

@@ -3,17 +3,14 @@
 var Vogogo = require('../lib/vogogo');
 var config = require('../config');
 
-if (process.argv[4] || !process.argv[2]) {
-  console.log('usage: ./listTransactions <customer> <currency> (optional)');
+if (process.argv[4] || !process.argv[3]) {
+  console.log('usage: ./getAccounts <customer> <currency>');
   process.exit();
 }
 
 var params = {};
 
-var currency = process.argv[3];
-if (currency) {
-  params.currency = currency;
-}
+params.currency = process.argv[3];
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
@@ -21,12 +18,12 @@ options.customerAccessToken = process.argv[2];
 
 var vogogo = new Vogogo(options);
 
-vogogo.listTransactions(params, function(err, transactions) {
+vogogo.getAccounts(params, function(err, accounts) {
   if (err) {
     console.log(err);
-  } else if (!transactions) {
+  } else if (!accounts) {
     console.log('no results from Vogogo');
   } else {
-    console.log(transactions);
+    console.log(accounts);
   }
 });

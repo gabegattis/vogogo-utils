@@ -8,7 +8,22 @@ if (process.argv[3]) {
   process.exit();
 }
 
-var params = {};
+var params = {
+      address_city: 'Toronto',
+      address_country: 'CA',
+      address_postal_code: 'M5P2N7',
+      address_state: 'CA-ON',
+      address_street_1: '1234 Main St - APPROVED',
+      cell_phone_country: 1,
+      cell_phone: 1234567890,
+      ip: '1.1.1.1',
+      is_business: false,
+      email: 'gabe+6@bitpay.com',
+      last_name: 'James',
+      first_name: 'Johnson',
+      date_of_birth: '1950-01-01',
+      occupation_id: '1'
+    };
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
