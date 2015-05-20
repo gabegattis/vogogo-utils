@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+'use strict';
+var Vogogo = require('../lib/vogogo');
+var config = require('../config');
+
+if (process.argv[5] || !process.argv[4]) {
+  console.log('usage: ./verifyMicroDeposit <customer> <bank account id> <amount>');
+  process.exit();
+}
+
+var params = {};
+
+params.id = process.argv[3];
+params.amount = process.argv[4];
+
+var options = config.authParams;
+options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
+options.customerAccessToken = process.argv[2];
+
+var vogogo = new Vogogo(options);
+
+vogogo.verifyMicroDeposit(params, function(err) {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('success');
+  }
+});

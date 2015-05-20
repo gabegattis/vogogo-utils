@@ -1592,6 +1592,209 @@ describe('Vogogo', function() {
     });
   });
 
+  describe('verifyMicroDeposit', function() {
+    it('should handle _post error', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+
+      var params = {
+        id: 'derp',
+        amount: 1.23
+      };
+
+      vogogo.verifyMicroDeposit(params, function(err) {
+        should.exist(err);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts/derp/verify');
+        _p.args[0][1].should.deep.equal(params);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle bad status code', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 666}, {error_message: 'asdf'});
+      });
+
+      var params = {
+        id: 'derp',
+        amount: 1.23
+      };
+
+      vogogo.verifyMicroDeposit(params, function(err) {
+        should.exist(err);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 666 - asdf');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts/derp/verify');
+        _p.args[0][1].should.deep.equal(params);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle non verified status', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {status: 'derp'});
+      });
+
+      var params = {
+        id: 'derp',
+        amount: 1.23
+      };
+
+      vogogo.verifyMicroDeposit(params, function(err) {
+        should.exist(err);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('account not verified - status: derp');
+        _p.callCount.should.equal(1);
+        _p.args[0][0].should.equal('/accounts/derp/verify');
+        _p.args[0][1].should.deep.equal(params);
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should error if no id', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        amount: 1
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /id is a required parameter/);
+
+      done();
+    });
+
+    it('should error if bad id', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        id: {},
+        amount: 1
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /id must be a string/);
+
+      done();
+    });
+
+    it('should error if no amount', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        id: '1234567890qwertyuiop'
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /amount is a required parameter/);
+
+      done();
+    });
+
+    it('should error if NaN amount', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        id: '1234567890qwertyuiop',
+        amount: 'asdf'
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      done();
+    });
+
+    it('should error if infinity amount', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        id: '1234567890qwertyuiop',
+        amount: Infinity
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      done();
+    });
+
+    it('should error if 0 amount', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        id: '1234567890qwertyuiop',
+        amount: 0
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      done();
+    });
+
+    it('should error if negative amount', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {
+        id: '1234567890qwertyuiop',
+        amount: -1
+      };
+
+      (function(){
+        vogogo.verifyMicroDeposit(params, function(){});
+      }).should.throw(Error, /invalid amount/);
+
+      done();
+    });
+
+    it('should verify the micro deposit', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {status: 'verified'});
+      });
+
+      var params = {
+        id: 'derp',
+        amount: 1.23
+      };
+
+      vogogo.verifyMicroDeposit(params, function(err) {
+        should.not.exist(err);
+        _p.args[0][0].should.equal('/accounts/derp/verify');
+        _p.callCount.should.equal(1);
+        _p.args[0][1].should.deep.equal(params);
+        sandbox.restore();
+        done();
+      });
+    });
+  });
+
   describe('_generateAuthToken', function() {
     it ('should generate the auth token', function(done) {
       var vogogo = new Vogogo(constructorOptions);
