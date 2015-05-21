@@ -25,16 +25,14 @@ describe('Vogogo', function() {
 
   var constructorOptions = {
     clientId: '555c3c5ede4b81f9e1d7f22f273b23ae745023d7d208d2da48a36312e5a83dab',
-    clientSecret: 'fb397fdf8d28ea72ec6901fe186eb74a6de28125ae026a14fade58eabafd9b50',
-    customerAccessToken: '3517d938-e4a6-1a99-12f7-1947d2cf41e0'
+    clientSecret: 'fb397fdf8d28ea72ec6901fe186eb74a6de28125ae026a14fade58eabafd9b50'
   };
 
   describe('constructor', function() {
     it('should create new Vogogo without apiPrefix', function(done) {
       var options = {
         clientId: 'asdf',
-        clientSecret: 'qwert',
-        customerAccessToken: 'zxcvb'
+        clientSecret: 'qwert'
       };
 
       var vogogo = new Vogogo(options);
@@ -42,7 +40,6 @@ describe('Vogogo', function() {
       vogogo.should.be.an.instanceOf(Vogogo);
       vogogo.clientId.should.equal('asdf');
       vogogo.clientSecret.should.equal('qwert');
-      vogogo.customerAccessToken.should.equal('zxcvb');
       vogogo.apiPrefix.should.equal(config.environments.production.apiPrefix);
       done();
     });
@@ -51,7 +48,6 @@ describe('Vogogo', function() {
       var options = {
         clientId: 'asdf',
         clientSecret: 'qwert',
-        customerAccessToken: 'zxcvb',
         apiPrefix: 'https://fakevogogo.com/api/v9000'
       };
 
@@ -60,7 +56,6 @@ describe('Vogogo', function() {
       vogogo.should.be.an.instanceOf(Vogogo);
       vogogo.clientId.should.equal('asdf');
       vogogo.clientSecret.should.equal('qwert');
-      vogogo.customerAccessToken.should.equal('zxcvb');
       vogogo.apiPrefix.should.equal('https://fakevogogo.com/api/v9000');
       done();
     });
@@ -69,7 +64,6 @@ describe('Vogogo', function() {
       var options = {
         clientId: 10,
         clientSecret: 'qwert',
-        customerAccessToken: 'zxcvb',
         apiPrefix: 'https://fakevogogo.com/api/v9000'
       };
 
@@ -82,7 +76,6 @@ describe('Vogogo', function() {
       var options = {
         clientId: 'asdf',
         clientSecret: 10,
-        customerAccessToken: 'zxcvb',
         apiPrefix: 'https://fakevogogo.com/api/v9000'
       };
 
@@ -95,7 +88,6 @@ describe('Vogogo', function() {
       var options = {
         clientId: 'adsf',
         clientSecret: 'qwert',
-        customerAccessToken: 'zxcvb',
         apiPrefix: 10
       };
 
@@ -106,8 +98,7 @@ describe('Vogogo', function() {
 
     it('should fail with no clientId', function(done) {
       var options = {
-        clientSecret: 'qwert',
-        customerAccessToken: 'zxcvb',
+        clientSecret: 'qwert'
       };
 
       var message = /you must supply a clientId in the constructor options/;
@@ -118,8 +109,7 @@ describe('Vogogo', function() {
 
     it('should fail with no clientSecret', function(done) {
       var options = {
-        clientId: 'adsf',
-        customerAccessToken: 'zxcvb',
+        clientId: 'adsf'
       };
 
       var message = /you must supply a clientSecret in the constructor options/;
@@ -142,7 +132,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
 
@@ -162,7 +152,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 403}, {error_message: 'this is an error'});
       });
 
@@ -182,7 +172,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 409}, {error_message: 'this is an error'});
       });
 
@@ -202,7 +192,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
 
@@ -222,7 +212,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200});
       });
 
@@ -240,7 +230,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -258,7 +248,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -282,7 +272,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -306,7 +296,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -330,7 +320,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -354,7 +344,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -378,7 +368,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -403,7 +393,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -428,7 +418,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -453,7 +443,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -478,7 +468,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -503,7 +493,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -528,7 +518,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -553,7 +543,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -578,7 +568,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -603,7 +593,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -628,7 +618,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -655,7 +645,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
       var params = {};
@@ -672,7 +662,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
       var params = {
@@ -692,7 +682,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
       var params = {
@@ -715,7 +705,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {id: '12345'};
@@ -736,7 +726,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {hello: 'world'});
       });
       var params = {id: '12345'};
@@ -758,7 +748,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
       var params = {};
@@ -779,7 +769,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {};
@@ -800,7 +790,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {});
       });
       var params = {};
@@ -821,7 +811,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {currency: 'XYZ'};
@@ -839,7 +829,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {transactions: ['hello', 'transaction']});
       });
       var params = {};
@@ -863,7 +853,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
       var params = {
@@ -890,7 +880,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {
@@ -917,7 +907,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {bank: 'account'});
       });
       var params = {
@@ -945,7 +935,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201}, {bank: 'account'});
       });
       var params = {
@@ -1386,7 +1376,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
 
@@ -1407,7 +1397,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {hello: 'world'});
       });
 
@@ -1427,7 +1417,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 201}, {hello: 'world'});
       });
 
@@ -1447,7 +1437,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 403}, {error_message: 'YOU SHALL NOT PASS'});
       });
 
@@ -1468,7 +1458,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 420}, {error_message: 'enhance your calm'});
       });
 
@@ -1491,7 +1481,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
 
@@ -1512,7 +1502,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 999}, {error_message: 'NO! NO! NO!'});
       });
 
@@ -1533,7 +1523,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {});
       });
 
@@ -1554,7 +1544,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {accounts: [{foo: 'bar'}, {foo: 'baz'}]});
       });
 
@@ -1597,7 +1587,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(new Error('this is an error'));
       });
 
@@ -1622,7 +1612,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 666}, {error_message: 'asdf'});
       });
 
@@ -1647,7 +1637,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {status: 'derp'});
       });
 
@@ -1775,7 +1765,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
         callback(null, {statusCode: 200}, {status: 'verified'});
       });
 
@@ -1796,12 +1786,31 @@ describe('Vogogo', function() {
   });
 
   describe('_generateAuthToken', function() {
-    it ('should generate the auth token', function(done) {
+    it('should generate the auth token', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var authToken = vogogo._generateAuthToken();
-      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDozN'
-      + 'TE3ZDkzOC1lNGE2LTFhOTktMTJmNy0xOTQ3ZDJjZjQxZTA=';
+      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDo=';
+      authToken.should.equal(goodToken);
+      done();
+    });
+
+    it('should generate the auth token with {} params', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var authToken = vogogo._generateAuthToken({});
+      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDo=';
+      authToken.should.equal(goodToken);
+      done();
+    });
+
+    it('should generate the auth token with customerAccessToken', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var authToken = vogogo._generateAuthToken({
+        customerAccessToken: '1234567890poiuytrewq'
+      });
+      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDoxMjM0NTY3ODkwcG9pdXl0cmV3cQ==';
       authToken.should.equal(goodToken);
       done();
     });
@@ -1820,13 +1829,14 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._post('/pay', {herp: 'derp'}, function(err, res, body) {
+      vogogo._post('/pay', {herp: 'derp'}, {customerAccessToken: 'asdf'}, function(err, res, body) {
         should.not.exist(err);
         should.exist(res);
         should.exist(body);
         res.should.deep.equal({statusCode: 200});
         body.should.deep.equal({foo: 'bar'});
         ge.callCount.should.equal(1);
+        ge.args[0][0].should.deep.equal({customerAccessToken: 'asdf'});
         po.callCount.should.equal(1);
         po.args[0][0].should.deep.equal({
           url: 'https://api.vogogo.com/v2/pay',
@@ -1853,7 +1863,7 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._post('/pay', {herp: 'derp'}, function(err, res, body) {
+      vogogo._post('/pay', {herp: 'derp'}, {}, function(err, res, body) {
         should.exist(err);
         should.not.exist(res);
         should.not.exist(body);
@@ -1886,7 +1896,7 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._post('/pay', {herp: 'derp'}, function(err, res, body) {
+      vogogo._post('/pay', {herp: 'derp'}, {}, function(err, res, body) {
         should.exist(err);
         should.not.exist(res);
         should.not.exist(body);
@@ -1921,14 +1931,14 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._get('/transactions', {herp: 'derp'}, function(err, res, body) {
+      vogogo._get('/transactions', {herp: 'derp'}, {customerAccessToken: 'asdf'}, function(err, res, body) {
         should.not.exist(err);
         should.exist(res);
         should.exist(body);
         res.should.deep.equal({statusCode: 200});
         body.should.deep.equal({foo: 'bar'});
         ga.callCount.should.equal(1);
-        ge.callCount.should.equal(1);
+        ga.args[0][0].should.deep.equal({customerAccessToken: 'asdf'});
         ge.args[0][0].should.deep.equal({
           url: 'https://api.vogogo.com/v2/transactions',
           headers: {
@@ -1954,7 +1964,7 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._get('/transactions', {}, function(err, res, body) {
+      vogogo._get('/transactions', {}, {}, function(err, res, body) {
         should.exist(err);
         should.not.exist(res);
         should.not.exist(body);
@@ -1987,7 +1997,7 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._get('/transactions', {}, function(err, res, body) {
+      vogogo._get('/transactions', {}, {}, function(err, res, body) {
         should.exist(err);
         should.not.exist(res);
         should.not.exist(body);
