@@ -24,6 +24,6 @@ vogogo.getTransaction(params, function(err, transaction) {
   } else if (!transaction) {
     console.log('no results from Vogogo');
   } else {
-    console.log(transaction);
+    console.log(JSON.stringify(transaction, null, 3));
   }
 });

@@ -36,6 +36,6 @@ vogogo.createCustomer(params, function(err, result) {
   } else if (!result) {
     console.log('no results from Vogogo');
   } else {
-    console.log(result);
+    console.log(JSON.stringify(result, null, 3);
   }
 });

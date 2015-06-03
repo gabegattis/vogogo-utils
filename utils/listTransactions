@@ -27,6 +27,6 @@ vogogo.listTransactions(params, function(err, transactions) {
   } else if (!transactions) {
     console.log('no results from Vogogo');
   } else {
-    console.log(transactions);
+    console.log(JSON.stringify(transactions, null, 3));
   }
 });

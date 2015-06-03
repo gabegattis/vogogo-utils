@@ -24,6 +24,6 @@ vogogo.getAccounts(params, function(err, accounts) {
   } else if (!accounts) {
     console.log('no results from Vogogo');
   } else {
-    console.log(accounts);
+    console.log(JSON.stringify(accounts, null, 3));
   }
 });
