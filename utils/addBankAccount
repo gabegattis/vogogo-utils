@@ -5,22 +5,44 @@ var config = require('../config');
 
 if (!process.argv[9] || process.argv[10]) {
   console.log('usage: ./addBankAccount <customer> <name> <institution> <transit> <routing> <number> <currency> <financial_type>');
+  console.log('note that some fields are currency specific. use "null" for these fields');
   process.exit();
 }
 
 var params = {
+  customerAccessToken: process.argv[2],
   name: process.argv[3],
-  institution: process.argv[4],
-  transit: process.argv[5],
-  routing: process.argv[6],
-  number: process.argv[7],
+  // institution: process.argv[4],
+  // transit: process.argv[5],
+  // routing: process.argv[6],
+  // number: process.argv[7],
   currency: process.argv[8],
   financial_type: process.argv[9],
 };
 
+
+// TODO: use Commander for this instead of doing it this hacky way
+var currencySpecificParams = {
+  institution: process.argv[4],
+  transit: process.argv[5],
+  routing: process.argv[6],
+  number: process.argv[7]
+};
+
+var keys = Object.keys(currencySpecificParams);
+for (var i = 0; i < keys.length; i++) {
+  var param = currencySpecificParams[keys[i]];
+  if (param === 'null') {
+    param = null;
+  }
+  params[keys[i]] = param;
+}
+
+
+
+
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
-options.customerAccessToken = process.argv[2];
 
 var vogogo = new Vogogo(options);
 

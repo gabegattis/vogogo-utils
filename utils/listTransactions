@@ -8,7 +8,9 @@ if (process.argv[4] || !process.argv[2]) {
   process.exit();
 }
 
-var params = {};
+var params = {
+  customerAccessToken: process.argv[2],
+};
 
 var currency = process.argv[3];
 if (currency) {
@@ -17,7 +19,6 @@ if (currency) {
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
-options.customerAccessToken = process.argv[2];
 
 var vogogo = new Vogogo(options);
 

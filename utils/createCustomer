@@ -3,27 +3,54 @@
 var Vogogo = require('../lib/vogogo');
 var config = require('../config');
 
-if (process.argv[3]) {
-  console.log('usage: ./createCustomer');
+if (!process.argv[3] || process.argv[15]) {
+  console.log('usage: ./createCustomer <address_city> <address_country> <address_postal_code> ' +
+    '<address_state> <address_street_1> <cell_phone_country> <cell_phone> <is_business> <email> '+
+    '<last_name> <first_name> <date_of_birth> <occupation_id>');
   process.exit();
 }
 
+/*
+// example for testing
+var testParams = {
+  address_city: 'Toronto',
+  address_country: 'CA',
+  address_postal_code: 'M5P2N7',
+  address_state: 'CA-ON',
+  address_street_1: '1234 Main St - APPROVED',
+  cell_phone_country: 1,
+  cell_phone: 1234567890,
+  ip: '1.1.1.1',
+  is_business: false,
+  email: 'gabe+7@bit8ay.com',
+  last_name: 'John',
+  first_name: 'Johnson',
+  date_of_birth: '1950-01-01',
+  occupation_id: '1'
+};
+*/
+/*
+When testing in non-production environments, include the word 'APPROVED', 'DENIED' or 'PENDING'
+in address_street_1to force the customer into that state (e.g. '100 Main St - APPROVED').
+*/
+
+
 var params = {
-      address_city: 'Toronto',
-      address_country: 'CA',
-      address_postal_code: 'M5P2N7',
-      address_state: 'CA-ON',
-      address_street_1: '1234 Main St - APPROVED',
-      cell_phone_country: 1,
-      cell_phone: 1234567890,
-      ip: '1.1.1.1',
-      is_business: false,
-      email: 'gabe+6@bitpay.com',
-      last_name: 'James',
-      first_name: 'Johnson',
-      date_of_birth: '1950-01-01',
-      occupation_id: '1'
-    };
+  address_city: process.argv[2],
+  address_country: process.argv[3],
+  address_postal_code: process.argv[4],
+  address_state: process.argv[5],
+  address_street_1: process.argv[6],
+  cell_phone_country: process.argv[7],
+  cell_phone: process.argv[8],
+  ip: '123.123.123.123',
+  is_business: process.argv[9],
+  email: process.argv[10],
+  last_name: process.argv[11],
+  first_name: process.argv[12],
+  date_of_birth: process.argv[13],
+  occupation_id: process.argv[14]
+};
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
@@ -36,6 +63,6 @@ vogogo.createCustomer(params, function(err, result) {
   } else if (!result) {
     console.log('no results from Vogogo');
   } else {
-    console.log(JSON.stringify(result, null, 3);
+    console.log(JSON.stringify(result, null, 3));
   }
 });
