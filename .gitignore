@@ -34,3 +34,6 @@ bin
 
 # for testing scripts and such
 sandbox
+
+# config
+userConfig.js

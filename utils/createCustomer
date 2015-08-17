@@ -43,7 +43,6 @@ var params = {
   address_street_1: process.argv[6],
   cell_phone_country: process.argv[7],
   cell_phone: process.argv[8],
-  ip: '123.123.123.123',
   is_business: process.argv[9],
   email: process.argv[10],
   last_name: process.argv[11],
@@ -54,6 +53,8 @@ var params = {
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
+options.ipAddress = config.ipAddress;
+options.deviceId = config.deviceId;
 
 var vogogo = new Vogogo(options);
 

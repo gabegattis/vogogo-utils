@@ -1,18 +1,64 @@
-module.exports = {
-  authParams: {
-    clientId: '9ea36e3c81fae645023317f22f273d2da48edd7d2053b58569c2e4a83dabc53c',
-    clientSecret: '8ea1ae026d14fafb3942bc69701fe5de7fdf2d28bffd12ea9b5286eb74a6dd28',
-    //customerAccessToken: '7107d534-d8b1-4b55-80e9-1822c9bf62c8' //gabe gattis
-    //customerAccessToken: 'cc845722-cd84-41ff-98f2-56a8b1a7732f' //bob dole
-    //john doe: 20f98b2c-5727-43df-b4c5-7165b87bc642
-  },
-  environments: {
-    staging: {
-      apiPrefix: 'https://staging.api.vogogo.com/v2'
-    },
-    production: {
-      apiPrefix: 'https://api.vogogo.com/v2'
-    }
-  },
-  defaultEnvironment: 'staging'
-};
+/*
+This is a simple config that has a default config checked into Git and a
+local config that overwrites conflicting values in the default config.
+
+The local config should be at vogogo-utils/userConfig.js
+
+
+Example:
+
+defaultConfig = {
+  foo: 'bar',
+  spam: 'eggs'
+  up: 'down',
+  baz: {
+    red: 'blue',
+    green: 'purple'
+  }
+}
+
+localConfig = {
+  foo: 'goo',
+  spam: 'eggs',
+  left: 'right',
+  baz: {
+    red: 'black',
+    white: 'black'
+  }
+}
+
+finalConfig = {
+  foo: 'goo',
+  spam: 'eggs',
+  up: 'down',
+  left: 'right',
+  baz: {
+    red: 'black',
+    green: 'purple',
+    white: 'black'
+  }
+}
+
+*/
+
+'use strict';
+
+var fs = require('fs');
+var merge = require('merge');
+
+var defaultConfig = require('./defaultConfig');
+
+var config;
+
+var localConfigPath = process.env.HOME + './userConfig.js';
+
+var localExists = fs.existsSync(localConfigPath);
+
+if (localExists) {
+  var localConfig = require(localConfigPath);
+  config = merge.recursive(defaultConfig, localConfig); //order of arguments is important! the second overwrites the first
+} else {
+  config = defaultConfig;
+}
+
+module.exports = config;

@@ -4,13 +4,13 @@ var Vogogo = require('../lib/vogogo');
 var config = require('../config');
 
 if (process.argv[4] || !process.argv[2]) {
-  console.log('usage: ./getAccounts <customer> <currency> (optional)');
+  console.log('usage: ./removeBankAccount <customer> <bankAccountId>');
   process.exit();
 }
 
 var params = {
   customerId: process.argv[2],
-  currency: process.argv[3]
+  bankAccountId: process.argv[3]
 };
 
 var options = config.authParams;
@@ -20,12 +20,12 @@ options.deviceId = config.deviceId;
 
 var vogogo = new Vogogo(options);
 
-vogogo.getAccounts(params, function(err, accounts) {
+vogogo.removeBankAccount(params, function(err, result) {
   if (err) {
     console.log(err);
-  } else if (!accounts) {
-    console.log('no results from Vogogo');
+  } else if (!result) {
+    console.log('no result from Vogogo');
   } else {
-    console.log(JSON.stringify(accounts, null, 3));
+    console.log(JSON.stringify(result, null, 3));
   }
 });

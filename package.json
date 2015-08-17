@@ -1,7 +1,7 @@
 {
   "name": "vogogo-utils",
   "version": "0.0.1",
-  "description": "utilities for interfacing with the Vogogo api",
+  "description": "utilities for interfacing with the Vogogo v3 api",
   "directories": {
     "test": "test"
   },
@@ -9,7 +9,6 @@
     "test": "mocha -R spec --recursive",
     "coverage": "istanbul cover _mocha -- --recursive"
   },
-
   "author": {
     "name": "Gabe Gattis",
     "email": "gabe@bitpay.com"
@@ -23,6 +22,6 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "request": "^2.54.0"
+    "merge": "^1.2.0"
   }
 }

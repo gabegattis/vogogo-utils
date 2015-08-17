@@ -15,40 +15,30 @@ describe('Vogogo', function() {
     },
     environments: {
       staging: {
-        apiPrefix: 'https://staging.api.vogogo.com/v2'
+        apiPrefix: 'https://staging.api.vogogo.com/v3'
       },
       production: {
-        apiPrefix: 'https://api.vogogo.com/v2'
+        apiPrefix: 'https://api.vogogo.com/v3'
       }
     }
   };
 
   var constructorOptions = {
     clientId: '555c3c5ede4b81f9e1d7f22f273b23ae745023d7d208d2da48a36312e5a83dab',
-    clientSecret: 'fb397fdf8d28ea72ec6901fe186eb74a6de28125ae026a14fade58eabafd9b50'
+    clientSecret: 'fb397fdf8d28ea72ec6901fe186eb74a6de28125ae026a14fade58eabafd9b50',
+    apiPrefix: 'https://api.vogogo.com/v3',
+    ipAddress: '127.0.0.1',
+    deviceId: 'blahblahblah'
   };
 
   describe('constructor', function() {
-    it('should create new Vogogo without apiPrefix', function(done) {
-      var options = {
-        clientId: 'asdf',
-        clientSecret: 'qwert'
-      };
-
-      var vogogo = new Vogogo(options);
-
-      vogogo.should.be.an.instanceOf(Vogogo);
-      vogogo.clientId.should.equal('asdf');
-      vogogo.clientSecret.should.equal('qwert');
-      vogogo.apiPrefix.should.equal(config.environments.production.apiPrefix);
-      done();
-    });
-
-    it('should create new Vogogo with apiPrefix', function(done) {
+    it('should create new Vogogo with all options', function(done) {
       var options = {
         clientId: 'asdf',
         clientSecret: 'qwert',
-        apiPrefix: 'https://fakevogogo.com/api/v9000'
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
       };
 
       var vogogo = new Vogogo(options);
@@ -57,14 +47,88 @@ describe('Vogogo', function() {
       vogogo.clientId.should.equal('asdf');
       vogogo.clientSecret.should.equal('qwert');
       vogogo.apiPrefix.should.equal('https://fakevogogo.com/api/v9000');
+      vogogo.ipAddress.should.equal('127.0.0.1');
+      vogogo.deviceId.should.equal('blahblahblah');
       done();
     });
 
+    it('should not create new Vogogo without clientId', function(done) {
+      var options = {
+        clientSecret: 'qwert',
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
+      };
+
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error);
+
+      done();
+    });
+
+    it('should not create new Vogogo without clientSecret', function(done) {
+      var options = {
+        clientId: 'asdf',
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
+      };
+
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error);
+
+      done();
+    });
+
+    it('should not create new Vogogo without apiPrefix', function(done) {
+      var options = {
+        clientId: 'asdf',
+        clientSecret: 'qwert',
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
+      };
+
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error);
+
+      done();
+    });
+
+    it('should not create new Vogogo without ipAddress', function(done) {
+      var options = {
+        clientId: 'asdf',
+        clientSecret: 'qwert',
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        deviceId: 'blahblahblah'
+      };
+
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error);
+
+      done();
+    });
+
+    it('should not create new Vogogo without deviceId', function(done) {
+      var options = {
+        clientId: 'asdf',
+        clientSecret: 'qwert',
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1'
+      };
+
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error);
+
+      done();
+    });
+
+
+
+
+
+
     it('should fail if clientId is not a string', function(done) {
       var options = {
-        clientId: 10,
+        clientId: {},
         clientSecret: 'qwert',
-        apiPrefix: 'https://fakevogogo.com/api/v9000'
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
       };
 
       (function(){var vogogo = new Vogogo(options);}).should.throw(Error, /clientId must be a string/);
@@ -75,8 +139,10 @@ describe('Vogogo', function() {
     it('should fail if clientSecret is not a string', function(done) {
       var options = {
         clientId: 'asdf',
-        clientSecret: 10,
-        apiPrefix: 'https://fakevogogo.com/api/v9000'
+        clientSecret: {},
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
       };
 
       (function(){var vogogo = new Vogogo(options);}).should.throw(Error, /clientSecret must be a string/);
@@ -88,7 +154,9 @@ describe('Vogogo', function() {
       var options = {
         clientId: 'adsf',
         clientSecret: 'qwert',
-        apiPrefix: 10
+        apiPrefix: {},
+        ipAddress: '127.0.0.1',
+        deviceId: 'blahblahblah'
       };
 
       (function(){var vogogo = new Vogogo(options);}).should.throw(Error, /apiPrefix must be a string/);
@@ -96,27 +164,35 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should fail with no clientId', function(done) {
+    it('should fail if ipAddress is not a string', function(done) {
       var options = {
-        clientSecret: 'qwert'
+        clientId: 'adsf',
+        clientSecret: 'qwert',
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: {},
+        deviceId: 'blahblahblah'
       };
 
-      var message = /you must supply a clientId in the constructor options/;
-      (function(){var vogogo = new Vogogo(options);}).should.throw(Error, message);
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error, /ipAddress must be a string/);
 
       done();
     });
 
-    it('should fail with no clientSecret', function(done) {
+    it('should fail if deviceId is not a string', function(done) {
       var options = {
-        clientId: 'adsf'
+        clientId: 'adsf',
+        clientSecret: 'qwert',
+        apiPrefix: 'https://fakevogogo.com/api/v9000',
+        ipAddress: '127.0.0.1',
+        deviceId: {}
       };
 
-      var message = /you must supply a clientSecret in the constructor options/;
-      (function(){var vogogo = new Vogogo(options);}).should.throw(Error, message);
+      (function(){var vogogo = new Vogogo(options);}).should.throw(Error, /deviceId must be a string/);
 
       done();
     });
+
+
   });
 
   describe('pay', function() {
@@ -124,17 +200,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
+        type: 'pay',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.pay(params, function(err) {
@@ -142,132 +219,37 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/pay');
+        _p.args[0][0].should.equal('/customers/asdf/bank');
         delete params.customerAccessToken;
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
     });
-
-    it('should handle code 403', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 403}, {error_message: 'this is an error'});
-      });
-
-      var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'CAD',
-        ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
-      };
-
-      vogogo.pay(params, function(err) {
-        should.exist(err);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('403 FORBIDDEN - this is an error');
-        _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/pay');
-        delete params.customerAccessToken;
-        _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
-        sandbox.restore();
-        done();
-      });
-    });
-
-    it('should handle code 409', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 409}, {error_message: 'this is an error'});
-      });
-
-      var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'CAD',
-        ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
-      };
-
-      vogogo.pay(params, function(err) {
-        should.exist(err);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('409 CONFLICT - this is an error');
-        _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/pay');
-        delete params.customerAccessToken;
-        _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
-        sandbox.restore();
-        done();
-      });
-    });
-
-    it('should handle code 418', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 418}, {error_message: 'this is an error'});
-      });
-
-      var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'CAD',
-        ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
-      };
-
-      vogogo.pay(params, function(err) {
-        should.exist(err);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('bad status code: 418 - this is an error');
-        _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/pay');
-        delete params.customerAccessToken;
-        _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
-        sandbox.restore();
-        done();
-      });
-    });
-
     it('should make a payment, code 200', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       vogogo.pay(params, function(err) {
         should.not.exist(err);
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/pay');
+        _p.args[0][0].should.equal('/customers/asdf/bank');
         delete params.customerAccessToken;
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -277,36 +259,36 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       vogogo.pay(params, function(err) {
         should.not.exist(err);
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/pay');
+        _p.args[0][0].should.equal('/customers/asdf/bank');
         delete params.customerAccessToken;
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
     });
 
-    it('should error if no id', function(done) {
+    it('should error if no merchant_transaction_id', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
@@ -315,12 +297,13 @@ describe('Vogogo', function() {
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        type: 'pay',
+        customerId: 'asdf'
       };
 
       (function(){
         vogogo.pay(params, function(){});
-      }).should.throw(Error, /id is a required parameter/);
+      }).should.throw(Error, /merchant_transaction_id is a required parameter/);
 
       _p.callCount.should.equal(0);
       sandbox.restore();
@@ -331,16 +314,17 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -356,16 +340,17 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',        
+        merchant_transaction_id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -381,16 +366,17 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -402,46 +388,22 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should error if no ip', function(done) {
+    it('should error if merchant_transaction_id is not a string', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'CAD',
-        customerAccessToken: 'asdf'
-      };
-
-      (function(){
-        vogogo.pay(params, function(){});
-      }).should.throw(Error, /ip is a required parameter/);
-
-      _p.callCount.should.equal(0);
-      sandbox.restore();
-      done();
-    });
-
-    it('should error if id is not a string', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 201});
-      });
-
-      var params = {
-        id : 1234,
+        merchant_transaction_id : 1234,
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -457,17 +419,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 78789878789898789,
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -483,17 +446,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: '78789878789898789',
         amount: 'hello',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -509,17 +473,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: '78789878789898789',
         amount: -1,
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -535,17 +500,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: '78789878789898789',
         amount: 0,
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -561,17 +527,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: '78789878789898789',
         amount: Infinity,
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -587,17 +554,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 019283746,
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -609,73 +577,22 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should error if ip is not a string', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 201});
-      });
-
-      var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'CAD',
-        ip: 127001,
-        customerAccessToken: 'asdf'
-      };
-
-      (function(){
-        vogogo.pay(params, function(){});
-      }).should.throw(Error, /ip must be a string/);
-
-      _p.callCount.should.equal(0);
-      sandbox.restore();
-      done();
-    });
-
-    it('should error if ip is too long', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 201});
-      });
-
-      var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'CAD',
-        ip: '123456789012345678901234567890123',
-        customerAccessToken: 'asdf'
-      };
-
-      (function(){
-        vogogo.pay(params, function(){});
-      }).should.throw(Error, /ip must be 32 characters or less/);
-
-      _p.callCount.should.equal(0);
-      sandbox.restore();
-      done();
-    });
-
     it('should error if id is too long', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234567890123456789012345678901234567',
+        merchant_transaction_id : '1234567890123456789012345678901234567',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'CAD',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -691,17 +608,18 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'XYZ',
         ip: '127.0.0.1',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        type: 'pay'
       };
 
       (function(){
@@ -713,91 +631,160 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should error if no customerAccessToken', function(done) {
+    it('should error if no customerId', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201});
       });
 
       var params = {
-        id : '1234',
-        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
-        amount: '155.00',
-        currency: 'XYZ',
-        ip: '127.0.0.1'
-      };
-
-      (function(){
-        vogogo.pay(params, function(){});
-      }).should.throw(Error, /customerAccessToken is a required parameter/);
-
-      _p.callCount.should.equal(0);
-      sandbox.restore();
-      done();
-    });
-
-    it('should error if invalid customerAccessToken', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 201});
-      });
-
-      var params = {
-        id : '1234',
+        merchant_transaction_id : '1234',
         account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
         amount: '155.00',
         currency: 'XYZ',
         ip: '127.0.0.1',
-        customerAccessToken: 123
+        type: 'pay'
       };
 
       (function(){
         vogogo.pay(params, function(){});
-      }).should.throw(Error, /customerAccessToken must be a string/);
+      }).should.throw(Error, /customerId is a required parameter/);
 
       _p.callCount.should.equal(0);
       sandbox.restore();
       done();
     });
-  });
 
-  describe('getTransaction', function() {
-    it('should error with no id', function(done) {
+    it('should error if invalid customerId', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 201});
+      });
+
+      var params = {
+        merchant_transaction_id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'XYZ',
+        ip: '127.0.0.1',
+        customerId: 123,
+        type: 'pay'
+      };
+
+      (function(){
+        vogogo.pay(params, function(){});
+      }).should.throw(Error, /customerId must be a string/);
+
+      _p.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should handle bad response code', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
+        callback(null, {statusCode: 400}, {error_message: 'uh-oh spaghettio'});
+      });
+
+      var params = {
+        merchant_transaction_id : '1234',
+        account_id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+        amount: '155.00',
+        currency: 'CAD',
+        ip: '127.0.0.1',
+        customerId: 'asdf',
+        type: 'pay'
+      };
+
+      vogogo.pay(params, function(err, body){
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 400 - uh-oh spaghettio');
+        _p.callCount.should.equal(1);
+        sandbox.restore();
+        done();
+      });
+    });
+  });
+
+  describe('getTransaction', function() {
+    it('should error with no customerId', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
-      var params = {customerAccessToken: 'asdf'};
+      var params = {txid: 'qwertyuiop'};
       (function(){
         vogogo.getTransaction(params, function(){});
-      }).should.throw(Error, /id is a required param/);
+      }).should.throw(Error, /customerId is a required param/);
 
       _g.callCount.should.equal(0);
       sandbox.restore();
       done();
     });
 
-    it('should error with non-string id', function(done) {
+    it('should error with non-string customerId', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
       var params = {
-        id: 9999,
-        customerAccessToken: 'asdf'
+        customerId: 9999,
+        txid: 'qwertyuiop'
       };
 
       (function(){
         vogogo.getTransaction(params, function(){});
-      }).should.throw(Error, /id must be a string/);
+      }).should.throw(Error, /customerId must be a string/);
+
+      _g.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error with no txid', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+      var params = {customerId: 'asdf'};
+      (function(){
+        vogogo.getTransaction(params, function(){});
+      }).should.throw(Error, /txid is a required param/);
+
+      _g.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error with non-string txid', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+      var params = {
+        customerId: 'asdf',
+        txid: 12345
+      };
+
+      (function(){
+        vogogo.getTransaction(params, function(){});
+      }).should.throw(Error, /txid must be a string/);
 
       _g.callCount.should.equal(0);
       sandbox.restore();
@@ -808,22 +795,22 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
       var params = {
-        id: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        txid: 'qwertyuiop'
       };
+
       vogogo.getTransaction(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions/12345');
+        _g.args[0][0].should.equal('/customers/asdf/transactions/qwertyuiop');
         _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -833,12 +820,12 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {
-        id: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        txid: 'qwertyuiop'
       };
 
       vogogo.getTransaction(params, function(err, body) {
@@ -847,9 +834,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('bad status code: 418 - this is an error');
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions/12345');
+        _g.args[0][0].should.equal('/customers/asdf/transactions/qwertyuiop');
         _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -859,21 +845,20 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(null, {statusCode: 200}, {hello: 'world'});
       });
       var params = {
-        id: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf',
+        txid: 'qwertyuiop'
       };
       vogogo.getTransaction(params, function(err, body) {
         should.not.exist(err);
         should.exist(body);
         body.should.deep.equal({hello: 'world'});
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions/12345');
+        _g.args[0][0].should.equal('/customers/asdf/transactions/qwertyuiop');
         _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -885,21 +870,20 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
-      var params = {customerAccessToken: 'asdf'};
+      var params = {
+        customerId: 'asdf'
+      };
       vogogo.listTransactions(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions');
+        _g.args[0][0].should.equal('/customers/asdf/transactions');
         _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
         sandbox.restore();
         done();
       });
@@ -909,45 +893,20 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
-      var params = {customerAccessToken: 'asdf'};
+      var params = {
+        customerId: 'asdf'
+      };
       vogogo.listTransactions(params, function(err, body) {
         should.exist(err);
         should.not.exist(body);
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('bad status code: 418 - this is an error');
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions');
+        _g.args[0][0].should.equal('/customers/asdf/transactions');
         _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
-        sandbox.restore();
-        done();
-      });
-    });
-
-    it('should handle no transactions', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 200}, {});
-      });
-      var params = {customerAccessToken: 'asdf'};
-      vogogo.listTransactions(params, function(err, body) {
-        should.exist(err);
-        should.not.exist(body);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('no transactions array in response from Vogogo');
-        _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions');
-        _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
         sandbox.restore();
         done();
       });
@@ -957,12 +916,12 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {
         currency: 'XYZ',
-        customerAccessToken: 'asdf'
+        customerIdn: 'asdf'
       };
 
       (function() {
@@ -978,22 +937,42 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 200}, {transactions: ['hello', 'transaction']});
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {foo: 'bar'});
       });
-      var params = {customerAccessToken: 'asdf'};
+      var params = {
+        customerId: 'asdf'
+      };
       vogogo.listTransactions(params, function(err, body) {
         should.not.exist(err);
         should.exist(body);
-        body.should.deep.equal(
-          ['hello', 'transaction']
-        );
+        body.should.deep.equal({foo: 'bar'});
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/transactions');
+        _g.args[0][0].should.equal('/customers/asdf/transactions');
         _g.args[0][1].should.deep.equal({});
-        _g.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should list transactions by currency', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, {foo: 'bar'});
+      });
+      var params = {
+        customerId: 'asdf',
+        currency: 'CAD'
+      };
+      vogogo.listTransactions(params, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.deep.equal({foo: 'bar'});
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/customers/asdf/transactions');
+        _g.args[0][1].should.deep.equal({currency: 'CAD'});
         sandbox.restore();
         done();
       });
@@ -1005,7 +984,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
       var params = {
@@ -1014,7 +993,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       vogogo.addBankAccount(params, function(err, body) {
         should.exist(err);
@@ -1022,12 +1001,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _p.args[0][1].should.deep.equal(params);
-        _p.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
         sandbox.restore();
         done();
       });
@@ -1037,7 +1012,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 418}, {error_message: 'this is an error'});
       });
       var params = {
@@ -1046,7 +1021,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       vogogo.addBankAccount(params, function(err, body) {
         should.exist(err);
@@ -1054,12 +1029,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('bad status code: 418 - this is an error');
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _p.args[0][1].should.deep.equal(params);
-        _p.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
         sandbox.restore();
         done();
       });
@@ -1069,7 +1040,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200}, {bank: 'account'});
       });
       var params = {
@@ -1078,7 +1049,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       vogogo.addBankAccount(params, function(err, body) {
         should.not.exist(err);
@@ -1087,12 +1058,8 @@ describe('Vogogo', function() {
           bank: 'account'
         });
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _p.args[0][1].should.deep.equal(params);
-        _p.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
         sandbox.restore();
         done();
       });
@@ -1102,7 +1069,7 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201}, {bank: 'account'});
       });
       var params = {
@@ -1111,7 +1078,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       vogogo.addBankAccount(params, function(err, body) {
         should.not.exist(err);
@@ -1120,12 +1087,8 @@ describe('Vogogo', function() {
           bank: 'account'
         });
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _p.args[0][1].should.deep.equal(params);
-        _p.args[0][2].should.deep.equal({
-          customerAccessToken: 'asdf'
-        });
         sandbox.restore();
         done();
       });
@@ -1138,7 +1101,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1154,7 +1117,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1170,7 +1133,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1185,7 +1148,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1200,7 +1163,7 @@ describe('Vogogo', function() {
         number: '1234567890',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1216,7 +1179,7 @@ describe('Vogogo', function() {
         currency: 'xyz',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1231,7 +1194,7 @@ describe('Vogogo', function() {
         number: '1234567890',
         currency: 'USD',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1247,7 +1210,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'slush fund',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1255,7 +1218,7 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should error with no customerAccessToken', function(done) {
+    it('should error with no customerId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
       var params = {
         name: 'a',
@@ -1266,11 +1229,11 @@ describe('Vogogo', function() {
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
-      }).should.throw(Error, /customerAccessToken is a required parameter/);
+      }).should.throw(Error, /customerId is a required parameter/);
       done();
     });
 
-    it('should error with invalid customerAccessToken', function(done) {
+    it('should error with invalid customerId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
       var params = {
         name: 'a',
@@ -1278,11 +1241,11 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'savings',
         routing: '123456789',
-        customerAccessToken: {}
+        customerId: {}
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
-      }).should.throw(Error, /customerAccessToken must be a string/);
+      }).should.throw(Error, /customerId must be a string/);
       done();
     });
 
@@ -1293,7 +1256,7 @@ describe('Vogogo', function() {
         number: '1234567890',
         currency: 'USD',
         financial_type: 'checking',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1309,7 +1272,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: {},
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1325,7 +1288,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '12345678',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1341,7 +1304,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '1234567890',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1357,7 +1320,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1373,7 +1336,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1389,7 +1352,7 @@ describe('Vogogo', function() {
         currency: 'USD',
         financial_type: 'checking',
         routing: '123456789',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1405,7 +1368,7 @@ describe('Vogogo', function() {
         currency: 'CAD',
         financial_type: 'checking',
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1422,7 +1385,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: {},
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1439,7 +1402,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '12',
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1456,7 +1419,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '1234',
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1472,7 +1435,7 @@ describe('Vogogo', function() {
         currency: 'CAD',
         financial_type: 'checking',
         institution: '123',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1489,7 +1452,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '123',
         transit: {},
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1506,7 +1469,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '123',
         transit: '123456',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1523,7 +1486,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '123',
         transit: '1234',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1540,7 +1503,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '123',
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1557,7 +1520,7 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '123',
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
@@ -1574,12 +1537,185 @@ describe('Vogogo', function() {
         financial_type: 'checking',
         institution: '123',
         transit: '12345',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
       (function(){
         vogogo.addBankAccount(params, function(){});
       }).should.throw(Error, /invalid number/);
       done();
+    });
+  });
+
+  describe('removeBankAccount', function() {
+    it('should error with no customerId', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback();
+      });
+
+      var params = {
+        bankAccountId: 'derp'
+      };
+
+      (function(){
+        vogogo.removeBankAccount(params, function(){});
+      }).should.throw(Error, /customerId is a required parameter/);
+
+      _d.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error with bad customerId', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback();
+      });
+
+      var params = {
+        customerId: 12345,
+        bankAccountId: 'derp'
+      };
+
+      (function(){
+        vogogo.removeBankAccount(params, function(){});
+      }).should.throw(Error, /customerId must be a string/);
+
+      _d.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error with no bankAccountId', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback();
+      });
+
+      var params = {
+        customerId: 'asdf',
+      };
+
+
+      (function(){
+        vogogo.removeBankAccount(params, function(){});
+      }).should.throw(Error, /bankAccountId is a required parameter/);
+
+      _d.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should error with bad bankAccountId', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback();
+      });
+
+      var params = {
+        customerId: 'asdf',
+        bankAccountId: 12345
+      };
+
+      (function(){
+        vogogo.removeBankAccount(params, function(){});
+      }).should.throw(Error, /bankAccountId must be a string/);
+
+      _d.callCount.should.equal(0);
+      sandbox.restore();
+      done();
+    });
+
+    it('should handle _delete error', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+
+      var params = {
+        customerId: 'asdf',
+        bankAccountId: 'derp'
+      };
+
+      vogogo.removeBankAccount(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        _d.callCount.should.equal(1);
+        _d.args[0][0].should.equal('/customers/asdf/bank_accounts/derp');
+        _d.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle non-200 response code', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback(null, {statusCode: 400}, {error_message: 'Vogogo can\'t even right now'});
+      });
+
+      var params = {
+        customerId: 'asdf',
+        bankAccountId: 'derp'
+      };
+
+      vogogo.removeBankAccount(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 400 - Vogogo can\'t even right now');
+        _d.callCount.should.equal(1);
+        _d.args[0][0].should.equal('/customers/asdf/bank_accounts/derp');
+        _d.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should remove a bank account', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _d = sandbox.stub(vogogo, '_delete', function(url, params, callback) {
+        callback(null, {statusCode: 200}, 'success');
+      });
+
+      var params = {
+        customerId: 'asdf',
+        bankAccountId: 'derp'
+      };
+
+      vogogo.removeBankAccount(params, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.equal('success');
+        _d.callCount.should.equal(1);
+        _d.args[0][0].should.equal('/customers/asdf/bank_accounts/derp');
+        _d.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
     });
   });
 
@@ -1597,7 +1733,7 @@ describe('Vogogo', function() {
       email: 'gabe+1@bitpay.com',
       last_name: 'Dole',
       first_name: 'Bob',
-      date_of_birth: '1900-01-01',
+      date_of_birth: '1950-01-01',
       occupation_id: '1'
     };
 
@@ -1605,7 +1741,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
 
@@ -1626,7 +1762,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200}, {hello: 'world'});
       });
 
@@ -1646,7 +1782,7 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 201}, {hello: 'world'});
       });
 
@@ -1662,32 +1798,11 @@ describe('Vogogo', function() {
       });
     });
 
-    it('should handle 403', function(done) {
-      var vogogo = new Vogogo(constructorOptions);
-      var sandbox = sinon.sandbox.create();
-
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 403}, {error_message: 'YOU SHALL NOT PASS'});
-      });
-
-      vogogo.createCustomer(customerParams, function(err, body) {
-        should.exist(err);
-        should.not.exist(body);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('403 FORBIDDEN - YOU SHALL NOT PASS');
-        _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/customers');
-        _p.args[0][1].should.deep.equal(customerParams);
-        sandbox.restore();
-        done();
-      });
-    });
-
     it('should hanle 420', function(done) {
       var vogogo = new Vogogo(constructorOptions);
       var sandbox = sinon.sandbox.create();
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 420}, {error_message: 'enhance your calm'});
       });
 
@@ -1712,13 +1827,12 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
 
       var params = {
-        currency: 'CAD',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.getAccounts(params, function(err, accounts) {
@@ -1727,10 +1841,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _g.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _g.args[0][1].should.equal(params);
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -1740,13 +1852,13 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
         callback(null, {statusCode: 999}, {error_message: 'NO! NO! NO!'});
       });
 
       var params = {
         currency: 'CAD',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.getAccounts(params, function(err, accounts) {
@@ -1755,38 +1867,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('bad status code: 999 - NO! NO! NO!');
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _g.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _g.args[0][1].should.equal(params);
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
-        sandbox.restore();
-        done();
-      });
-    });
-
-    it('should handle no accounts', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 200}, {});
-      });
-
-      var params = {
-        currency: 'CAD',
-        customerAccessToken: 'asdf'
-      };
-
-      vogogo.getAccounts(params, function(err, accounts) {
-        should.exist(err);
-        should.not.exist(accounts);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('no accounts array in response from Vogogo');
-        _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/accounts');
-       delete params.customerAccessToken;
-        _g.args[0][1].should.equal(params);
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -1796,13 +1878,13 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _g = sandbox.stub(vogogo, '_get', function(url, params, authParams, callback) {
-        callback(null, {statusCode: 200}, {accounts: [{foo: 'bar'}, {foo: 'baz'}]});
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, [{foo: 'bar'}, {foo: 'baz'}]);
       });
 
       var params = {
         currency: 'CAD',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.getAccounts(params, function(err, accounts) {
@@ -1817,24 +1899,11 @@ describe('Vogogo', function() {
           }
         ]);
         _g.callCount.should.equal(1);
-        _g.args[0][0].should.equal('/accounts');
-        delete params.customerAccessToken;
+        _g.args[0][0].should.equal('/customers/asdf/bank_accounts');
         _g.args[0][1].should.equal(params);
-        _g.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
-    });
-
-    it('should error if no currency', function(done) {
-      var vogogo = new Vogogo(constructorOptions);
-
-      var params = {
-        customerAccessToken: 'asdf'
-      };
-
-      (function() {vogogo.getAccounts(params, function(){});}).should.throw(Error, /currency is a required parameter/);
-      done();
     });
 
     it('should error if bad currency', function(done) {
@@ -1842,33 +1911,33 @@ describe('Vogogo', function() {
 
       var params = {
         currency: 'XYZ',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function() {vogogo.getAccounts(params, function(){});}).should.throw(Error, /invalid currency/);
       done();
     });
 
-    it('should error if no customerAccessToken', function(done) {
+    it('should error if no customerId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
         currency: 'CAD'
       };
 
-      (function() {vogogo.getAccounts(params, function(){});}).should.throw(Error, /customerAccessToken is a required parameter/);
+      (function() {vogogo.getAccounts(params, function(){});}).should.throw(Error, /customerId is a required parameter/);
       done();
     });
 
-    it('should error if invalid customerAccessToken', function(done) {
+    it('should error if invalid customerId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
         currency: 'CAD',
-        customerAccessToken: {}
+        customerId: {}
       };
 
-      (function() {vogogo.getAccounts(params, function(){});}).should.throw(Error, /customerAccessToken must be a string/);
+      (function() {vogogo.getAccounts(params, function(){});}).should.throw(Error, /customerId must be a string/);
       done();
     });
   });
@@ -1878,14 +1947,14 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(new Error('this is an error'));
       });
 
       var params = {
-        id: 'derp',
+        bankAccountId: 'derp',
         amount: 1.23,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.verifyMicroDeposit(params, function(err) {
@@ -1893,10 +1962,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('this is an error');
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/accounts/derp/verify');
-        delete params.customerAccessToken;
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts/derp/micro_verifications');
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -1906,14 +1973,14 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 666}, {error_message: 'asdf'});
       });
 
       var params = {
-        id: 'derp',
+        bankAccountId: 'derp',
         amount: 1.23,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.verifyMicroDeposit(params, function(err) {
@@ -1921,10 +1988,8 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('bad status code: 666 - asdf');
         _p.callCount.should.equal(1);
-        _p.args[0][0].should.equal('/accounts/derp/verify');
-        delete params.customerAccessToken;
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts/derp/micro_verifications');
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -1934,14 +1999,14 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200}, {status: 'derp'});
       });
 
       var params = {
-        id: 'derp',
+        bankAccountId: 'derp',
         amount: 1.23,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.verifyMicroDeposit(params, function(err) {
@@ -1949,41 +2014,39 @@ describe('Vogogo', function() {
         err.should.be.an.instanceOf(Error);
         err.message.should.equal('account not verified - status: derp');
         _p.callCount.should.equal(1);
-        delete params.customerAccessToken;
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
     });
 
-    it('should error if no id', function(done) {
+    it('should error if no bankAccountId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
         amount: 1,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function(){
         vogogo.verifyMicroDeposit(params, function(){});
-      }).should.throw(Error, /id is a required parameter/);
+      }).should.throw(Error, /bankAccountId is a required parameter/);
 
       done();
     });
 
-    it('should error if bad id', function(done) {
+    it('should error if bad bankAccountId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: {},
+        bankAccountId: {},
         amount: 1,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function(){
         vogogo.verifyMicroDeposit(params, function(){});
-      }).should.throw(Error, /id must be a string/);
+      }).should.throw(Error, /bankAccountId must be a string/);
 
       done();
     });
@@ -1992,8 +2055,8 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
-        customerAccessToken: 'asdf'
+        bankAccountId: '1234567890qwertyuiop',
+        customerId: 'asdf'
       };
 
       (function(){
@@ -2007,9 +2070,9 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
+        bankAccountId: '1234567890qwertyuiop',
         amount: 'asdf',
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function(){
@@ -2023,9 +2086,9 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
+        bankAccountId: '1234567890qwertyuiop',
         amount: Infinity,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function(){
@@ -2039,9 +2102,9 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
+        bankAccountId: '1234567890qwertyuiop',
         amount: 0,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function(){
@@ -2055,9 +2118,9 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
+        bankAccountId: '1234567890qwertyuiop',
         amount: -1,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       (function(){
@@ -2067,33 +2130,33 @@ describe('Vogogo', function() {
       done();
     });
 
-    it('should error if no customerAccessToken', function(done) {
+    it('should error if no customerId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
+        bankAccountId: '1234567890qwertyuiop',
         amount: 1,
       };
 
       (function(){
         vogogo.verifyMicroDeposit(params, function(){});
-      }).should.throw(Error, /customerAccessToken is a required parameter/);
+      }).should.throw(Error, /customerId is a required parameter/);
 
       done();
     });
 
-    it('should error if invalid customerAccessToken', function(done) {
+    it('should error if invalid customerId', function(done) {
       var vogogo = new Vogogo(constructorOptions);
 
       var params = {
-        id: '1234567890qwertyuiop',
+        bankAccountId: '1234567890qwertyuiop',
         amount: 1,
-        customerAccessToken: {}
+        customerId: {}
       };
 
       (function(){
         vogogo.verifyMicroDeposit(params, function(){});
-      }).should.throw(Error, /customerAccessToken must be a string/);
+      }).should.throw(Error, /customerId must be a string/);
 
       done();
     });
@@ -2102,23 +2165,21 @@ describe('Vogogo', function() {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var _p = sandbox.stub(vogogo, '_post', function(url, params, authParams, callback) {
+      var _p = sandbox.stub(vogogo, '_post', function(url, params, callback) {
         callback(null, {statusCode: 200}, {status: 'verified'});
       });
 
       var params = {
-        id: 'derp',
+        bankAccountId: 'derp',
         amount: 1.23,
-        customerAccessToken: 'asdf'
+        customerId: 'asdf'
       };
 
       vogogo.verifyMicroDeposit(params, function(err) {
         should.not.exist(err);
-        _p.args[0][0].should.equal('/accounts/derp/verify');
+        _p.args[0][0].should.equal('/customers/asdf/bank_accounts/derp/micro_verifications');
         _p.callCount.should.equal(1);
-        delete params.customerAccessToken;
         _p.args[0][1].should.equal(params);
-        _p.args[0][2].should.deep.equal({customerAccessToken: 'asdf'});
         sandbox.restore();
         done();
       });
@@ -2134,26 +2195,6 @@ describe('Vogogo', function() {
       authToken.should.equal(goodToken);
       done();
     });
-
-    it('should generate the auth token with {} params', function(done) {
-      var vogogo = new Vogogo(constructorOptions);
-
-      var authToken = vogogo._generateAuthToken({});
-      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDo=';
-      authToken.should.equal(goodToken);
-      done();
-    });
-
-    it('should generate the auth token with customerAccessToken', function(done) {
-      var vogogo = new Vogogo(constructorOptions);
-
-      var authToken = vogogo._generateAuthToken({
-        customerAccessToken: '1234567890poiuytrewq'
-      });
-      var goodToken = 'Basic ZmIzOTdmZGY4ZDI4ZWE3MmVjNjkwMWZlMTg2ZWI3NGE2ZGUyODEyNWFlMDI2YTE0ZmFkZTU4ZWFiYWZkOWI1MDoxMjM0NTY3ODkwcG9pdXl0cmV3cQ==';
-      authToken.should.equal(goodToken);
-      done();
-    });
   });
 
   describe('_post', function() {
@@ -2162,29 +2203,33 @@ describe('Vogogo', function() {
       var vogogo = new Vogogo(constructorOptions);
 
       var po = sandbox.stub(request, 'post', function(options, callback) {
-        callback(null, {statusCode: 200}, '{"foo": "bar"}');
+        callback(null, {statusCode: 200}, {foo: 'bar'});
       });
 
       var ge = sandbox.stub(vogogo, '_generateAuthToken', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._post('/pay', {herp: 'derp'}, {customerAccessToken: 'asdf'}, function(err, res, body) {
+      vogogo._post('/pay', {herp: 'derp'}, function(err, res, body) {
         should.not.exist(err);
         should.exist(res);
         should.exist(body);
         res.should.deep.equal({statusCode: 200});
         body.should.deep.equal({foo: 'bar'});
         ge.callCount.should.equal(1);
-        ge.args[0][0].should.deep.equal({customerAccessToken: 'asdf'});
         po.callCount.should.equal(1);
         po.args[0][0].should.deep.equal({
-          url: 'https://api.vogogo.com/v2/pay',
+          url: 'https://api.vogogo.com/v3/pay',
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
           },
-          qs: {herp: 'derp'}
+          qs: {
+            herp: 'derp',
+            device_id: 'blahblahblah',
+            ip: '127.0.0.1'
+          },
+          json: true
         });
         sandbox.restore();
         done();
@@ -2203,7 +2248,7 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._post('/pay', {herp: 'derp'}, {}, function(err, res, body) {
+      vogogo._post('/pay', {herp: 'derp'}, function(err, res, body) {
         should.exist(err);
         should.not.exist(res);
         should.not.exist(body);
@@ -2212,45 +2257,17 @@ describe('Vogogo', function() {
         ge.callCount.should.equal(1);
         po.callCount.should.equal(1);
         po.args[0][0].should.deep.equal({
-          url: 'https://api.vogogo.com/v2/pay',
+          url: 'https://api.vogogo.com/v3/pay',
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
           },
-          qs: {herp: 'derp'}
-        });
-        sandbox.restore();
-        done();
-      });
-    });
-
-    it('should handle JSON.parse error', function(done) {
-      var sandbox = sinon.sandbox.create();
-      var vogogo = new Vogogo(constructorOptions);
-
-      var po = sandbox.stub(request, 'post', function(options, callback) {
-        callback(null, {statusCode: 200}, '{{{{{{{{{');
-      });
-
-      var ge = sandbox.stub(vogogo, '_generateAuthToken', function() {
-        return 'Basic 12345678';
-      });
-
-      vogogo._post('/pay', {herp: 'derp'}, {}, function(err, res, body) {
-        should.exist(err);
-        should.not.exist(res);
-        should.not.exist(body);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('failed to parse response from Vogogo');
-        ge.callCount.should.equal(1);
-        po.callCount.should.equal(1);
-        po.args[0][0].should.deep.equal({
-          url: 'https://api.vogogo.com/v2/pay',
-          headers: {
-            Authorization: 'Basic 12345678',
-            'Content-Type': 'application/json'
+          qs: {
+            herp: 'derp',
+            device_id: 'blahblahblah',
+            ip: '127.0.0.1'
           },
-          qs: {herp: 'derp'}
+          json: true
         });
         sandbox.restore();
         done();
@@ -2259,33 +2276,37 @@ describe('Vogogo', function() {
   });
 
   describe('_get', function() {
-    it('should make a get with the right url, params, and authentication', function(done) {
+    it('should make a get with the right url, params', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
       var ge = sandbox.stub(request, 'get', function(options, callback) {
-        callback(null, {statusCode: 200}, '{"foo": "bar"}');
+        callback(null, {statusCode: 200}, {foo: 'bar'});
       });
 
       var ga = sandbox.stub(vogogo, '_generateAuthToken', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._get('/transactions', {herp: 'derp'}, {customerAccessToken: 'asdf'}, function(err, res, body) {
+      vogogo._get('/transactions', {herp: 'derp'}, function(err, res, body) {
         should.not.exist(err);
         should.exist(res);
         should.exist(body);
         res.should.deep.equal({statusCode: 200});
         body.should.deep.equal({foo: 'bar'});
         ga.callCount.should.equal(1);
-        ga.args[0][0].should.deep.equal({customerAccessToken: 'asdf'});
         ge.args[0][0].should.deep.equal({
-          url: 'https://api.vogogo.com/v2/transactions',
+          url: 'https://api.vogogo.com/v3/transactions',
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
           },
-          qs: {herp: 'derp'}
+          qs: {
+            herp: 'derp',
+            device_id: 'blahblahblah',
+            ip: '127.0.0.1'
+          },
+          json: true
         });
         sandbox.restore();
         done();
@@ -2304,7 +2325,7 @@ describe('Vogogo', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._get('/transactions', {}, {}, function(err, res, body) {
+      vogogo._get('/transactions', {}, function(err, res, body) {
         should.exist(err);
         should.not.exist(res);
         should.not.exist(body);
@@ -2313,45 +2334,92 @@ describe('Vogogo', function() {
         ga.callCount.should.equal(1);
         ge.callCount.should.equal(1);
         ge.args[0][0].should.deep.equal({
-          url: 'https://api.vogogo.com/v2/transactions',
+          url: 'https://api.vogogo.com/v3/transactions',
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
           },
-          qs: {}
+          qs: {
+            device_id: 'blahblahblah',
+            ip: '127.0.0.1'
+          },
+          json: true
         });
         sandbox.restore();
         done();
       });
     });
+  });
 
-    it('should handle  JSON.parse error', function(done) {
+  describe('_delete', function() {
+    it('should make a get with the right url, params', function(done) {
       var sandbox = sinon.sandbox.create();
       var vogogo = new Vogogo(constructorOptions);
 
-      var ge = sandbox.stub(request, 'get', function(options, callback) {
-        callback(null, {statusCode: 200}, '{{{{{{{{{');
+      var de = sandbox.stub(request, 'del', function(options, callback) {
+        callback(null, {statusCode: 200}, {foo: 'bar'});
       });
 
       var ga = sandbox.stub(vogogo, '_generateAuthToken', function() {
         return 'Basic 12345678';
       });
 
-      vogogo._get('/transactions', {}, {}, function(err, res, body) {
-        should.exist(err);
-        should.not.exist(res);
-        should.not.exist(body);
-        err.should.be.an.instanceOf(Error);
-        err.message.should.equal('failed to parse response from Vogogo');
+      vogogo._delete('/transactions', {herp: 'derp'}, function(err, res, body) {
+        should.not.exist(err);
+        should.exist(res);
+        should.exist(body);
+        res.should.deep.equal({statusCode: 200});
+        body.should.deep.equal({foo: 'bar'});
         ga.callCount.should.equal(1);
-        ge.callCount.should.equal(1);
-        ge.args[0][0].should.deep.equal({
-          url: 'https://api.vogogo.com/v2/transactions',
+        de.args[0][0].should.deep.equal({
+          url: 'https://api.vogogo.com/v3/transactions',
           headers: {
             Authorization: 'Basic 12345678',
             'Content-Type': 'application/json'
           },
-          qs: {}
+          qs: {
+            herp: 'derp',
+            device_id: 'blahblahblah',
+            ip: '127.0.0.1'
+          },
+          json: true
+        });
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle request error', function(done) {
+      var sandbox = sinon.sandbox.create();
+      var vogogo = new Vogogo(constructorOptions);
+
+      var de = sandbox.stub(request, 'del', function(options, callback) {
+        callback(new Error('this is an error'));
+      });
+
+      var ga = sandbox.stub(vogogo, '_generateAuthToken', function() {
+        return 'Basic 12345678';
+      });
+
+      vogogo._delete('/transactions', {}, function(err, res, body) {
+        should.exist(err);
+        should.not.exist(res);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        ga.callCount.should.equal(1);
+        de.callCount.should.equal(1);
+        de.args[0][0].should.deep.equal({
+          url: 'https://api.vogogo.com/v3/transactions',
+          headers: {
+            Authorization: 'Basic 12345678',
+            'Content-Type': 'application/json'
+          },
+          qs: {
+            device_id: 'blahblahblah',
+            ip: '127.0.0.1'
+          },
+          json: true
         });
         sandbox.restore();
         done();

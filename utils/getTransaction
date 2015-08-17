@@ -4,17 +4,19 @@ var Vogogo = require('../lib/vogogo');
 var config = require('../config');
 
 if (!process.argv[3] || process.argv[4]) {
-  console.log('usage: ./getTransaction <customer> <id>');
+  console.log('usage: ./getTransaction <customerId> <txid>');
   process.exit();
 }
 
 var params = {
-  customerAccessToken: process.argv[2],
-  id: process.argv[3]
+  customerId: process.argv[2],
+  txid: process.argv[3]
 };
 
 var options = config.authParams;
 options.apiPrefix = config.environments[config.defaultEnvironment].apiPrefix;
+options.ipAddress = config.ipAddress;
+options.deviceId = config.deviceId;
 
 var vogogo = new Vogogo(options);
 
