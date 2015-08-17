@@ -1,6 +1,6 @@
 {
   "name": "vogogo-utils",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "utilities for interfacing with the Vogogo v3 api",
   "directories": {
     "test": "test"
