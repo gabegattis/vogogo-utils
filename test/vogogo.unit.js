@@ -2186,6 +2186,126 @@ describe('Vogogo', function() {
     });
   });
 
+  describe('listBankAccounts', function() {
+    it('should error if no customerId', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {};
+
+      (function(){
+        vogogo.listBankAccounts(params, function(){});
+      }).should.throw(Error, /customerId is a required parameter/);
+
+      done();
+    });
+
+    it('should error if non-string customerId', function(done) {
+      var vogogo = new Vogogo(constructorOptions);
+
+      var params = {customerId: {}};
+
+      (function(){
+        vogogo.listBankAccounts(params, function(){});
+      }).should.throw(Error, /customerId must be a string/);
+
+      done();
+    });
+
+    it('should handle _get error', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(new Error('this is an error'));
+      });
+
+      var params = {customerId: 'qwertyuiop'};
+
+      vogogo.listBankAccounts(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('this is an error');
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/customers/qwertyuiop/bank_accounts');
+        _g.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should handle bad status code', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 500}, {error_message: 'this is an error'});
+      });
+
+      var params = {customerId: 'qwertyuiop'};
+
+      vogogo.listBankAccounts(params, function(err, body) {
+        should.exist(err);
+        should.not.exist(body);
+        err.should.be.an.instanceOf(Error);
+        err.message.should.equal('bad status code: 500 - this is an error');
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/customers/qwertyuiop/bank_accounts');
+        _g.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+
+    it('should get the bank accounts', function(done) {
+      var sandbox = sinon.sandbox.create();
+
+      var vogogo = new Vogogo(constructorOptions);
+
+      var response = [
+        {
+          id: 'fd1d2295-7a96-4259-a916-4de9bdf9bb53',
+          type: 'bank',
+          name: 'My Chase Savings',
+          currency: 'USD',
+          last4: '1193',
+          financial_type: 'checking',
+          status: 'verified',
+          error_messages: []
+        },
+        {
+          id: '65d4f40f-8bfc-44f0-a9a2-cbcd3d6b4247',
+          type: 'bank',
+          name: 'My ATB Savings',
+          currency: 'CAD',
+          last4: '9393',
+          financial_type: 'checking',
+          status: 'verified',
+          error_messages: []
+        }
+      ];
+
+      var _g = sandbox.stub(vogogo, '_get', function(url, params, callback) {
+        callback(null, {statusCode: 200}, response);
+      });
+
+      var params = {customerId: 'qwertyuiop'};
+
+      vogogo.listBankAccounts(params, function(err, body) {
+        should.not.exist(err);
+        should.exist(body);
+        body.should.equal(response);
+        _g.callCount.should.equal(1);
+        _g.args[0][0].should.equal('/customers/qwertyuiop/bank_accounts');
+        _g.args[0][1].should.deep.equal({});
+        sandbox.restore();
+        done();
+      });
+    });
+  });
+
   describe('_generateAuthToken', function() {
     it('should generate the auth token', function(done) {
       var vogogo = new Vogogo(constructorOptions);
