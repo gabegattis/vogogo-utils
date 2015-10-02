@@ -50,7 +50,7 @@ var defaultConfig = require('./defaultConfig');
 
 var config;
 
-var localConfigPath = process.env.HOME + './userConfig.js';
+var localConfigPath = __dirname + '/userConfig.js';
 
 var localExists = fs.existsSync(localConfigPath);
 
